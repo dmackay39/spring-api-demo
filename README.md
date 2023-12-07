@@ -9,7 +9,17 @@ I plan on adding to this with some more full explanations of what is going on.
 * Service - Contains the logic for the API calls.
 * Controller - Accepts the HTTP requests from the front end and passes them to the service layer to be processed.
 
+### Model
+* Key articles: https://www.baeldung.com/jpa-entities, https://projectlombok.org/features/Data
+* Classes which you want to be present in the SQL database are annotated with @Entity. This also requires the class to have an Id (which can be inherited from a super class) and a no-arguments constructor.
+* Annotating them with @Data generates getters and setters for all fields, a required args constructor (a constructor with the fields required to be non-null as parameters), and toString, equals, and hashCode methods. If the class extends another class, the @EqualsAndHashCode(callSuper=true) annotation will create equals and hashCode methods which take into account the inherited fields as well as the in-class fields.
+* When doing OneToMany and ManyToOne annotations, think about it in these terms: One (class name) To Many (field name). Eg One author has a list of books, so we put the annotation @One(author)ToMany(books) on the List<Books> in the author class. And similarly, in the book class, there are Many (books) to One (author) so we put @ManyToOne on the author field.
+ * In these relationships, we put a JsonManagedReference annotation on the List and a JsonBackReference reference on the single field. This controls the recursion when returning the JSON objects so that there won't be an error due to infinite looping. Eg if each book has an author, and each author has a list of books containing that book, and that book has that author etc...
+* Enum fields are annotated with @Enumerated with an argument depending on whether the enum is ordinal or string. Eg an ordered set of enums like the days in the week might be ordinal, but something like names of colours would be EnumType.String.   
+* See my other github repository for info on the inheritance strategies employed here: https://github.com/dmackay39/spring-inheritance-strategies
+
 #### Repository
+* Key articles: https://www.baeldung.com/spring-data-jpa-query
 * Annotated with @Repository and extends CrudRepository for basic CRUD functions (eg save, deleteById etc).
 * It is possible to make custom queries through two methods.
   * Syntax: In IAuthorRepository, the programme figures out what is looked for by the syntax of the method name. findByNameContains(String filter) returns authors whose name contains the string simply from the name of the method.
