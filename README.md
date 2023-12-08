@@ -28,3 +28,27 @@ I plan on adding to this with some more full explanations of what is going on.
   * and the SQL queries it conducts behind the scenes to fulfil it are:
     * select a1_0.id,a1_0.name from author a1_0 where (select count(1) from lendable_material m1_0 where a1_0.id=m1_0.screenwriter_id)>0 order by (select count(1) from lendable_material m2_0 where a1_0.id=m2_0.screenwriter_id)
     * select m1_0.screenwriter_id,m1_0.id,m1_0.is_available,m1_0.title,d1_0.id,d1_0.name,m1_0.movie_genre from (select * from lendable_material t where t.material_type='Movie') m1_0 left join director d1_0 on d1_0.id=m1_0.director_id where m1_0.screenwriter_id=?
+
+#### Service
+* Consists of an interface to provide fliexibility to swap out implementations. The chosen concrete implementation is annotated with @Service.
+* It requires injecting the required repository. This is done by declaring a repository and making a constructor that injects it. Spring knows the repository you are looking for as it is annotated.
+* Note that methods like repository.findAll() return iterables.
+
+#### Controller
+* Annotated with @RestController. Requires you to inject a service similar to how a repository was injected in the service part.
+* CRUD (Create, Read, Update, Delete) operations correspond to @PostMapping, @GetMapping, @PutMapping, and @DeleteMapping respectively.
+* The create and update methods have an @RequestBody annotation in front of the Author argument so that the programme knows to interpret the body of the request sent to the API as an author object.
+* @PathParam represents an optional addition to the url that can change what the controller chooses to do. In this case, writing out /authors?filter=t will find the authors with "t" in their name. Note that the StringUtils is from com.apache.commons.lang3.
+* @PathVariable represents a mandatory part of the url. It reads the part of the url enclosed in curly braces { }.
+
+### Database
+
+#### H2-database
+* Key article: https://www.baeldung.com/spring-boot-h2-database
+* When writing the data.sql file, keep in mind that you are writing SQL statements, so the attributes will have the names of the SQL db columns rather than the fields of the class.
+
+### Testing
+* Key article: https://docs.spring.io/spring-framework/reference/testing.html
+
+#### Philosophy
+* Testing seems to be an area of debate for some. From reading Uncle Bob's Clean Craftsmanship, I don't think it is necessary to test every part of this application. It would be strange to test the repository as it is simply extending the CrudRepository interface. It's also possible to test some parts of the application through others. So I think the testing is best done on the controller, as through the controller you can test the service and the repository. In these tests though, it is important to maximise coverage and ensure that every line of every method in the controller is tested.
